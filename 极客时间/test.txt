@@ -1,2 +1,1 @@
-rewrite file
-one two
+file_manager
