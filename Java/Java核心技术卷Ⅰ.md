@@ -298,5 +298,209 @@ System.out.printf("%s %s %s", array.length, array1.length, array2.length);
 
 * 不规则数组
 
-## 
+## 第4章 对象与类
+
+### 面向对象程序设计概述
+
+* 面向对象程序设计 OOP(Object Oriented Program)
+
+* 在OOP中，不必关心对象的具体实现，只要满足用户的需求即可
+
+* 类（class）是构造对象的模板或蓝图。由类构造（construct）对象的过程称为创建类的实例（instance）
+
+* 对象中的数据称为实例域（instance field），操作数据的过程称为方法（method）
+
+* 实现封装的关键在于绝对不能让类中的方法直接地访问其他类的实例域
+
+* 在扩展一个类的时候，这个扩展后的心累具有所扩展类的全部属性和方法，在新类中只需提供适合这个新类的方法和数据域就可以了
+
+* 类与类之间的常见关系
+
+    * 依赖（uses-a）
+
+        如果一个类的方法操纵另一个类的对象，我们就说一个类依赖另一个类
+
+    * 聚合（has-a）
+
+        一个Order对象包含一些Item对象，聚合关系意味着类A包含类B的对象
+
+    * 继承（is-a）
+
+### 使用预定义类
+
+* 一个对象变量并没有实际包含一个对象，而仅仅是引用了一个对象，在Java中，任何对象变量的值都是对存储在另外一个地方的一个对象的引用
+
+* LocalDate 用来处理日历
+
+    ```java
+    LocalDate today = LocalDate.now();
+    int somedays = today.getDayOfMonth() - 1;
+    int month = today.getMonthValue();
+    LocalDate firstDay = today.minusDays(somedays);
+    
+    System.out.println("Mon Tue Wed Thu Fri Sat Sun");
+    for (int i = 0; i < firstDay.getDayOfWeek().getValue() - 1; i++) {
+      System.out.print("    ");
+    }
+    while (firstDay.getMonthValue() == month) {
+      System.out.printf("%3d", firstDay.getDayOfMonth());
+    
+      if (firstDay.getDayOfMonth() == today.getDayOfMonth()) {
+        System.out.print("*");
+      } else {
+        System.out.print(" ");
+      }
+    
+      if (firstDay.getDayOfWeek() == DayOfWeek.SUNDAY) {
+        System.out.println();
+      }
+    
+      firstDay = firstDay.plusDays(1);
+    }
+    ```
+
+### 用户自定义类
+
+```java
+class Employee{
+  // instance fields
+  private String name;
+  private double salary;
+  private LocalDate hireDay;
+  
+  // constructor
+  public Employee(String n, double s, int year, int month, int day){
+    name = n;
+    salary = s;
+    hireDay = LocalDate.of(year, month, day);
+  }
+  
+  // a method
+  public String getName(){
+    return name;
+  }
+  
+  // more methods
+}
+```
+
+* 构造器
+
+    * 构造器和类同名
+    * 每个类可以有一个以上的构造器
+    * 构造器可以有0个、1个或多个参数
+    * 构造器没有返回值
+    * 构造器总是伴随着new操作一起调用
+
+* 隐式参数和显示参数
+
+    ```java
+    public void raiseSalary(double byPercent){
+      double raise = salary * byPercent / 100;
+      salary += raise
+    }
+    ```
+
+    * raiseSalary方法有两个参数。第一个参数称为隐式（implicit）参数，即方法名前面出现的Employee类对象。第二个参数位于方法名后面括号中的数值，这是一个显示（explicit）参数。（有人把隐式参数称为方法调用的目标或者接受者）在每一个方法中，关键字this表示隐式参数
+
+* 不要编写返回引用可变对象的访问器方法，如果需要返回一个对象的引用，应该首先对它进行克隆（clone）
+
+    ```java
+    class Employee{
+      public Date getHireDay(){
+        return (Date)hireDay.clone();
+      }
+    }
+    ```
+
+* final实例域
+
+    * 可以将实例域定义为final。构建对象时必须初始化这样的域。也就是说，必须确保在每一个构造器执行之后，这个域的值被设置，并且后面的操作中，不能再对它进行修改
+
+### 静态域与静态方法
+
+* 静态域
+    * `private static int indexId = 1 `它属于类，而不属于任何独立的对象
+* 静态常量
+    * `public static final double PI = 3.141592653589793`
+* 静态方法
+    * 静态方法是一种不能向对象实施操作的方法。
+    * `Math.pow(x, a)`在运算时，不使用任何Math对象。换句话说，没有隐式参数
+    * 可以认为静态方法是没有this参数的方法
+    * 对象可以调用静态方法，但是不推荐，原因是静态方法的计算结果和对象毫无关系，容易造成混淆，建议使用类名调用
+    * 下面两种情况下使用静态方法
+        * 一个方法不需要访问对象状态，其所需参数都是通过显示参数提供（如：Math.pow）
+        * 一个方法只需要访问类的静态域
+    * 工厂方法
+        * LocalDate.now
+        * LocalDate.of
+        * 为什么不利用构造器完成这些操作
+            * 无法命名构造器
+            * 当使用构造器时，无法改变所构造的对象类型
+
+### 方法参数
+
+按值调用（call by value）表示方法接收的是调用者提供的值
+
+按引用调用（call by reference）表示方法接收的是调用者提供的变量地址
+
+一个方法可以修改传递引用所对应的变量值，而不能修改传递值调用所对应的变量值
+
+**Java程序设计语言总是采用按值调用。也就是说，方法得到的是所有参数值的一个拷贝，特别是，方法不能修改传递给它的任何参数变量的内容**
+
+很多程序设计语言（特别是C++和Pascal）提供了两种参数传递的方式：值调用和引用调用。有些程序员认为Java程序设计语言对对象采用的是引用调用，实际上，这种理解是不对的。例如：
+
+```java
+public static void swap(Employee x, Employee y){
+  Employee temp = x;
+  x = y;
+  y = temp
+}
+
+public static void main(String[] args){
+  Employee a = new Employee("Tom", 8888, 1990, 1, 1);
+  Employee b = new Employee("Jack", 9999, 2000, 1, 2);
+  swap(a, b)
+}
+```
+
+如果Java对对象采用的是按引用调用，那么这个方法实现交换数据的效果，但是方法并没有改变存储在变量a和b中的对象引用。swap方法的参数x和y被初始化为两个对象引用的拷贝，这个方法交换的是这两个拷贝。在方法结束时参数变量x，y被丢弃了，原来变量a和b仍然引用这个方法调用之前所引用的对象
+
+* 一个方法不能修改一个基本数据类型的参数
+* 一个方法可以改变一个对象参数的状态
+* 一个方法不能让对象参数引用一个新的对象
+
+### 对象构造
+
+* 重载（overloading）
+
+    如果多个方法，有相同的名字、不同的参数，便产生了重载。
+
+    要完整地描述一个方法，需要指出方法名以及参数类型。这叫做方法的签名（signature）。返回类型不是方法签名的一部分，也就是说不能有两个名字相同、参数类型也相同但却返回不同类型值的方法
+
+* 默认域初始化
+
+    * 类中的域可以不初始化，没有初始化类中的域，将会被自动初始化为默认值（0、false、null）
+    * 局部变量必须进行初始化
+
+* 无参数的构造器
+
+    * 很多类都包含一个无参数的构造函数，对象由无参数构造函数创建时，其状态会设置为适当的默认值
+    * 仅当类没有提供任何构造器的时候，系统才会提供一个默认的构造器
+
+* 调用另一个构造器
+
+    this()
+
+* 初始化块（initialization block）
+
+    `{}`构造类的对象，这些块就会执行
+
+* 对象析构与finalize方法
+
+    finalize方法将在垃圾回收器清除对象之前调用。在实际应用中，不要依赖于使用finalize方法回收任何短缺的资源，这是因为很难知道这个方法什么时候才能够调用
+
+### 包
+
+
 
