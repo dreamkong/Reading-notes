@@ -611,5 +611,44 @@ JDK包含一个很有用的工具，叫做javadoc，它可以由源文件生成�
 * 优先使用不可变的类
     * LocalDate类以及java.time包中的其他类是不可变--没有方法能修改对象的状态。类似plusDays方法并不是更改对象，而是返回状态以及修改的新对象
 
+## 第5章 继承
 
+###  类、超类和子类
 
+* 定义子类
+
+    * ```java
+        public class Manager extends Employee{
+          //添加域和方法
+          private double bonus;
+        }
+        ```
+
+* 覆盖方法
+
+    子类可以覆盖（override）父类的方法
+
+    ```java
+    public double getSalary(){
+      double baseSalary = super.getSalary();
+      return baseSalary + bonus
+    }
+    ```
+
+    有些人认为super与this引用是类似的概念，实际上，这样比较并不恰当。这是因为super不是一个对象的引用，不能将super赋给另一个对象变量，它只是一个指示编译器调用超类方法的特殊关键字。
+
+* 子类构造器
+
+    ```java
+    public Manager(String name, double salary, int year, int month, int day){
+      // 使用super调用构造器的语句必须是子类构造器的第一条语句
+      super(name, salary, year, month, day);
+      bonus = 0;
+    }
+    ```
+
+    如果子类的构造器没有显示地调用父类的构造器，则将自动地调用父类默认（没有参数）的构造器。如果父类没有不带参数的构造器，并且子类构造器中又没有显示地调用父类的其他构造器，则Java编译器报错。
+
+* 多态
+
+    有一个用来判断是否应该设计为继承关系的简单规则，这就是“is-a”规则，它表明子类的每个对象也是父类的对象。
