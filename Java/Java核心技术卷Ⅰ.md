@@ -502,5 +502,114 @@ public static void main(String[] args){
 
 ### 包
 
+* 类的导入
+
+    * `java.time.LocalDate today = java.time.LocalDate.now();`
+
+    * ```java
+        import java.util.*;
+        
+        LocalDate today = LocalDate.now();
+        ```
+
+    * ```java
+        import java.util.LocalDate;
+        
+        LocalDate today = LocalDate.now();
+        ```
+
+* 静态导入
+
+    * `import static java.lang.System`
+
+* 将类放入包中
+
+    * `package com.dk.corejava`
+
+* 包的作用域
+
+    * default修饰的类可以被包内的所有方法访问
+
+### 类路径
+
+* 类存储在文件系统的子目录中，类的路径必须与包名匹配
+* 类文件也可以存储在JAR（JAVA归档）文件中（JAR文件使用ZIP格式组织文件和子目录，可以使用所有ZIP应用程序查看JAR文件）
+
+### 文档注释
+
+JDK包含一个很有用的工具，叫做javadoc，它可以由源文件生成一个HTML文档
+
+* javadoc会从下面几个特征中抽取信息：
+    * 包
+    * 公有类与接口
+    * 公有的和受保护的构造器及方法
+    * 公有的和受保护的域
+
+* 类注释
+
+    ```java
+    /**
+     * 一个员工类
+     */
+    public class Employee{
+      
+    }
+    ```
+
+* 方法注释
+
+    ```java
+    /**
+     * 给一个员工加薪
+     * @param byPercent 加薪的百分比（例如：10就是10%）
+     * @return 加薪的数额
+     */
+    public double raiseSalary(double byPercent){
+      double raise = salary * byPercent / 100;
+      salary += raise;
+      return raise;
+    }
+    ```
+
+* 域注释
+
+    只需要对公有域（通常指的是静态常量）建立文档
+
+    ```java
+    /**
+     * 员工的类型：老板
+     */
+    public static final int BOSS = 1;
+    ```
+
+* 通用注释
+
+    @author dk
+
+    @version 1.2
+
+    @since version 1.1
+
+    @deprecated
+
+    @see
+
+### 类设计技巧
+
+* 一定要保证数据私有
+    * 这是最重要的，绝对不能破坏封装性。
+    * 有时候需要编写一个访问器方法或者更改器方法，但是最好还是保持实例域的私有
+* 一定要对数据初始化
+    * Java不会对局部变量进行初始化，但是会对对象的实例域进行初始化
+    * 最好不要依赖系统的默认值，而是应该县实地初始化所有的数据，具体的初始化方式可以是提供默认值，也可以在所有构造器中设置默认值
+* 不要在类中使用过多的基本数据类型
+    * 就是说，用其他的类代替多个相关的基本类型的使用
+    * 例如：一个Address类代替一个Customer类中的`private String street` `private String city` `private String state` `private int zip`
+* 不是所有的域都需要独立的域访问器和修改器
+* 将职责过多的类进行分解
+* 类名和方法名要能体现它们的职责
+* 优先使用不可变的类
+    * LocalDate类以及java.time包中的其他类是不可变--没有方法能修改对象的状态。类似plusDays方法并不是更改对象，而是返回状态以及修改的新对象
+
 
 
