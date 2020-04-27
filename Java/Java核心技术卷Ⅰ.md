@@ -765,3 +765,25 @@ JDK包含一个很有用的工具，叫做javadoc，它可以由源文件生成�
 
 ### 参数数量可变的方法
 
+允许将一个数组传递给可变参数方法的最后一个参数。
+
+### 枚举类
+
+```java
+public enum Size{
+    SMALL("S"),MEDIUM("M"),LARGE("L"),EXTRA_LARGE("XL");
+    
+    private String abbreviation;
+    
+    public Size(String abbreviation){
+        this.abbreviation = abbreviation;
+    }
+    
+    public String getAbbreviation(){
+        return abbreviation;
+    }
+}
+```
+
+### 反射
+
