@@ -652,3 +652,116 @@ JDK包含一个很有用的工具，叫做javadoc，它可以由源文件生成�
 * 多态
 
     有一个用来判断是否应该设计为继承关系的简单规则，这就是“is-a”规则，它表明子类的每个对象也是父类的对象。
+
+* 理解方法调用
+
+    * 静态绑定 private static final修饰或者构造器
+    * 动态绑定 调用方法依赖隐式参数的实际类型
+
+    在覆盖一个方法的时候，子类方法不能低于父类方法的可见性。
+
+* 阻止继承：final类和方法
+
+    * 如果一个类声明为final，只有其中的方法自动地成为final，而不包括域
+
+* 强制类型转换
+
+    * 只能在继承层次内进行类型转换
+    * 在将父类转换成子类之前，应该使用instanceof进行检查
+
+* 抽象类
+
+    * 包含一个或多个抽象方法的类必须声明为抽象类
+    * 抽象类还可以包含具体数据和方法
+
+    ```java
+    public abstract class Person{
+      private String name;
+      
+      public Person(String name){
+        this.name = name
+      }
+      
+      public String getName(){
+        return this.name;
+      }
+      
+      public abstract String getDescription();
+    }
+    ```
+
+    * 扩展抽象类可以有两种选择，一种是在抽象类中定义部分抽象类方法或不定义抽象类方法，这样就必须将子类也标记为抽象类；另一种是定义全部的抽象方法，这样一来，子类就不是抽象类。
+
+* 受保护访问
+
+    * private 仅对本类可见
+    * public 对所有类可见
+    * protected 对本包和所有子类可见
+    * 默认 对本包可见
+
+### Object：所有类的超类
+
+* equals方法
+
+    在Object类中，这个方法将判断两个对象是否具有相同的引用。
+
+* 相等测试与继承
+
+    如果隐式和显示参数不属于同一个类，equals方法将如何处理呢？
+
+    `if(!(otherObject instanceof Employee)) return false`许多程序员喜欢使用instanceof进行检测，这样做非但没有解决otherObject是子类的情况，并且还有可能招致一些麻烦。
+
+    下面给出编写一个完美的equals方法的建议：
+
+    1. 显示参数命名为otherObject，稍后需要将它转换成为另一个叫做other的变量。
+    2. 检测this与otherObject是否引用同一个对象`if(this == otherObject) return true;`
+    3. 检测otherObject是否为null，如果为null则返回false`if(otherObject == null) return false;`
+    4. 比较this与otherObject是否属于同一个类`if(getClass() != otherObject.getClass()) return false;`如果所有的子类都拥有统一的语义，就使用`if(!(otherObject instanceof Employee)) return false;`
+    5. 将otherObject转换为相应的类类型变量 `ClassName other = (ClassNmae)otherObject;`
+    6. 现在开始对所有需要比较的域进行比较了。使用`==`比较基本类型，使用`equals`比较对象域（如果是数组类型的域可以使用Arrays.equals方法）。如果所有的域都匹配，就返回true，否则返回false
+
+* hashCode方法
+
+    散列码（hashcode）是由对象导出的一个整型值。散列码是没有规律的。如果x和y是两个不同的对象，x.hashCode()和y.hashCode()基本上不会相同。
+
+* toString方法
+
+    用于返回表示对象值的字符串。
+
+    只要一个对象与一个字符串通过操作符“+”连接起来，Java编译就会自动地调用toString方法。
+
+### 泛型数组列表
+
+`ArrayList<T> array = new ArrayList<>();`
+
+一旦能够确定数组列表的大小不再发生变化，就可以调用trimToSize方法。这个方法将存储区域的大小调整为当前元素数量所需要的存储数目。垃圾回收器将回收多余的存储空间。
+
+* 访问数组列表元素
+
+    * add 添加元素 set 设置元素（它只能替换数组中已经存在的元素）
+
+    * 下面这个技巧可以一举两得，既可以灵活地扩展数组，又可以方便地访问数组元素。
+
+        ```java
+        ArrayList<X> list = new ArrayList<>();
+        n = 0
+        while(n < 10){
+          list.add(X);
+        	n++;
+        }
+        
+        X[] a = new X[list.size()];
+        list.toArray(a);
+        ```
+
+* 类型化与原始数组列表的兼容性
+
+### 对象包装器与自动装箱
+
+有些时候需要将int这样的基本类型转换为对象。所有的基本类型都有一个对应的类。这些类称为包装器（wrapper）。Integer、Long、Float、Double、Short、Byte、Character、Void、Boolean前6个类派生于公共的父类Number。对象包装器类是不可变的，即一旦构造了包装器，就不允许更改其中的值。同时，对象包装器还是final，因此不能定义他们的子类。
+
+* 由于每个值分别包装在对象中，所以`ArrayList<Integer>`的效率远远低于`int[]`数组。
+* 自动装箱规范要求boolean、byte、char <= 127，介于-128~127之间的short和int被包装到固定的对象中。
+
+### 参数数量可变的方法
+
