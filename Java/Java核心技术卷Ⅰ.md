@@ -787,3 +787,183 @@ public enum Size{
 
 ### 反射
 
+* 反射机制可以用来：
+
+    * 在运行时分析类的能力
+    * 在运行时查看对象，例如，编写一个toString方法供所有类使用
+    * 实现通用的数组操作代码
+    * 利用Method对象
+
+* Class类
+
+    ```java
+    Employee e;
+    // 第一种获取Class对象
+    Class cl = e.getClass();
+    e.getClass().getName();
+    
+    String className = "java.util.Random";
+    // 第二种获取Class对象
+    Class cl = Class.forName(className);
+    
+    // 第三种获取Class对象
+    Class cl1 = Random.class;
+    Class cl2 = int.class;
+    Class cl3 = Double[].class;
+    // 请注意，一个Class对象实际上表示的是一个类型，而这个类型未必一定是一种类。int不是类，但是int.class是一个Class类型的对象
+    ```
+
+    * Class实际上是一个泛型类。`Employee.class`的类型是`Class<Employee>`
+
+    * 可以使用==运算符实现两个类对象的比较
+
+        `if(e.getClass == Employee.class)`
+
+    * 动态地创建一个类的实例
+
+        `e.getClass().newInstance();`newInstance方法调用默认的构造器（没有参数的构造器），如果这个类没有无参构造器的话，就会抛出异常。
+
+* 捕获异常
+
+    * 异常有两种类型：
+
+        * 未检查异常
+            * 例如访问null引用
+        * 已检查异常
+            * 编译器会检查是否提供了处理器
+
+    * ```java
+        try{
+          String name = ...;
+          Class cl = Class.forName(name);
+         
+        }catch(Exception e){
+          e.printStackTrace();
+        }
+        ```
+
+* 利用反射分析类的能力
+
+    * 检查类的结构
+
+        在java.lang.reflect包中有三个类Field、Method和Constructor分别用于描述类的域、方法和构造器。这三个类都有一个getName方法用来返回项目的名称。Field类有一个getType方法用来返回描述域所属类型的Class对象。Method和Constructor类有能报告参数类型的方法。Method类还有一个能够报告返回类型的方法。这三个类还有getModifiers的方法，它将返回一个整型数值，用来描述public和static这样的修饰符。
+
+    ```java
+    public static void main(String... args) {
+      String name;
+      if (args.length > 0) name = args[0];
+      else {
+        Scanner in = new Scanner(System.in);
+        System.out.println("Enter class name(e.g. java.util.Date):");
+        name = in.next();
+      }
+    
+      try {
+        Class cl = Class.forName(name);
+        Class supercl = cl.getSuperclass();
+        String modifiers = Modifier.toString(cl.getModifiers());
+        if (modifiers.length() > 0) System.out.print(modifiers + " ");
+        System.out.print("class " + name);
+        if (supercl != null && supercl != Object.class) System.out.println(" extends " + supercl.getName());
+        System.out.println("{");
+    
+        printConstructors(cl);
+        printMethods(cl);
+        printFields(cl);
+    
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+      System.exit(0);
+    }
+    
+    /**
+         * 打印所有的域
+         *
+         * @param cl 一个Class对象
+         */
+    private static void printFields(Class cl) {
+      Field[] fields = cl.getDeclaredFields();
+    
+      for (Field f : fields) {
+        Class type = f.getType();
+        String name = f.getName();
+        System.out.print("  ");
+        String modifiers = Modifier.toString(f.getModifiers());
+        if (modifiers.length() > 0) System.out.print(modifiers);
+        System.out.println(type.getName() + " " + name + ";");
+      }
+    }
+    
+    /**
+         * 打印所有方法
+         *
+         * @param cl 一个Class对象
+         */
+    private static void printMethods(Class cl) {
+      Method[] methods = cl.getDeclaredMethods();
+    
+      for (Method m : methods) {
+        Class retType = m.getReturnType();
+        String name = m.getName();
+    
+        System.out.print("  ");
+        printModifiers(m);
+        System.out.print(retType.getName() + " " + name + "(");
+        //打印参数
+        printParams(m);
+      }
+      System.out.println();
+    }
+    
+    /**
+         * 打印所有的构造方法
+         *
+         * @param cl 一个Class对象
+         */
+    private static void printConstructors(Class cl) {
+      Constructor[] constructors = cl.getDeclaredConstructors();
+    
+      for (Constructor c : constructors) {
+        String name = c.getName();
+        System.out.print("  ");
+        printModifiers(c);
+        System.out.print(name + "(");
+        printParams(c);
+    
+      }
+      System.out.println();
+    }
+    
+    private static void printParams(Executable executable) {
+      //打印参数
+      Class[] paramTypes = executable.getParameterTypes();
+      for (int i = 0; i < paramTypes.length; i++) {
+        if (i > 0) System.out.print(", ");
+        System.out.print(paramTypes[i].getName());
+      }
+      System.out.println(");");
+    }
+    
+    private static void printModifiers(Executable executable) {
+      String modifiers = Modifier.toString(executable.getModifiers());
+      if (modifiers.length() > 0) System.out.print(modifiers + " ");
+    }
+    ```
+
+* 在运行时使用反射分析对象
+
+* 使用反射编写泛型数组代码
+
+* 调用任意方法
+
+* 继承的设计技巧
+
+    * 将公共操作和域放在父类
+    * 不要使用受保护的域
+    * 使用继承实现”is-a“关系
+    * 除非所有继承的方法都有意义，否则不要使用继承
+    * 在覆盖方法的时候，不要改变预期的行为
+    * 使用多态，而不是类型信息
+    * 不要过多地使用反射
+
