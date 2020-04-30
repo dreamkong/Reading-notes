@@ -1,61 +1,123 @@
-###Activity
-####一 activity生命周期
-* activity4中状态
-	* running paused stopped(被完全覆盖 不可见 部分成员变量存在) killed 
-* activity生命周期
+# Android笔记
+
+## Activity
+
+Activity是与用户交互的接口
+
+Android系统通过Activity栈的形式来管理Activity
+
+###  Activity生命周期
+
+* Activity4中状态
+	
+	* Active：Activity处于栈顶
+	* Paused：可见但不可交互
+	* Stopped：不可见（被完全覆盖 部分成员变量存在）
+	* Killed：系统回收掉
+	
+* Activity生命周期
+	
+	![Activity生命周期](./img/activity_lifecycle.png)
+	
 	* Activity启动->onCreate->onStart(可见)->onResume(可见 用户可以操作)
 	* 点Home回到主界面(Activity不可见)->onPause->onStop
 	* 再次回到原Activity->onRestart(不可见->可见)->onStart->onResume
 	* 退出当前Activity->onPause->onStop->onDestroy
-* android进程优先级
+	* 异常终止的时候onSaveInstanceState（Android3.0之前onResume之后调用，3.0之后onPause之后调用，9.0之后onStop之后调用）自动调用保存数据，onRestoreInstanceState方法恢复数据
+	
+* Android进程优先级
 	* 前台
 	* 可见
 	* 服务
 	* 后台
 	* 空
 	
-####二 android任务栈
-####三 activity启动模式
+### Android任务栈
+
+![Androir任务栈](./img/android_task_stack.png)
+
+### Activity之间通信
+
+* Intent/Bundle
+* 类静态变量
+* 全局变量
+
+### Activity与Fragment通信
+
+* Activity将数据传递给Fragment
+
+    * Bundle `fragment.setArguments(bundle);`
+    * 直接在Activity中定义方法
+
+* Fragment将数据传递给Activity
+
+    * 接口
+
+        1. 在Fragment中定义一个内部回调接口，Activity实现这个接口
+
+        2. Fragment的方法onAttach()
+
+        3. 调用onDetach方法，这个时候要把传递进来的Activity对象释放掉
+
+### Activity与Service数据通信
+
+* 绑定服务，利用ServiceConnection类
+* 简单通信，利用Intent进行传值
+* 定义一个callback接口来监听服务中的进程变化
+
+### Activity启动模式
+
 * standard
-* singletop栈顶复用
-* singletask栈内复用 提到栈顶(此Activity) 调用onNewInstance
-* singleinstance 独享一个栈
+* singleTop栈顶复用 调用onNewInstance
+* singleTask栈内复用 提到栈顶(此Activity)并移除在此之上的所有Activity 调用onNewInstance
+    * 首先根据taskAffinity（默认为包名）去寻找当前是否存在一个对应名字的任务栈
+    * 如果不存在，则会建一个新的Task
+    * 如果存在，则得到该任务栈，查找该任务栈中是否存在该Activity
+* singleInstance 独享一个栈
+    * 以singleInstance模式启动Activity具有全局唯一性
+    * 如果在启动这样的Activity时，已经存在了一个实例
+    * 以singleInstance模式启动的Activity具有独占性
 
-####四 scheme协议
-###Fragment
-####一 Fragment为什么被称为第五大组件
-* 使用频率高
-* 有自己的生命周期
-* 动态灵活加载到activity中
-	* 依附activity
-	
-##### Fragment加载到Activity的两种方式
-* 添加Fragment到Activity布局文件中
-* 动态在activity中添加fragment
+### scheme协议
 
-##### FragmentPagerAdapter和FragmentStatePagerAdapter区别
-* FragmentPagerAdapter页面较少  销毁时调用detach UI分离
-* FragmentStatePagerAdapter页面较多 销毁时调用remove 回收内存
+## Service
 
-####Fragment生命周期
-####Fragment通信
-* 在Fragment中调用Activity的方法 getActivity()
-* 在Activity中调用Fragment中方法 接口回调
-* 在Fragment中调用Fragment中方法 findFragmentById
-####Fragment的replace、add、remove
+### Service的生命周期
 
-###Service
-####一 service的应用场景，以及和Thread区别
-#####Service是什么
-Service是一个一种可以在后台执行长时间运行操作而没有用户界面的应用组件。
-运行在主线程（不能执行耗时操作）
-#####service和Thread的区别
-* 定义 service运行在主线程 Thread相对独立
-* 实际开发 Thread执行耗时操作
-* 应用场景 Service后台播放音乐 天气预报通知 数据统计
+![Service生命周期](./img/service_lifecycle.png)
 
-####二 开启service的两种方式以及区别
+### service的应用场景，以及和Thread区别
+
+* Service是什么
+
+    Service是一种可以在后台执行长时间运行操作而没有用户界面的应用组件。
+    运行在主线程（不能执行耗时操作）
+
+* Thread是什么
+
+    Thread是程序执行的最小单元，它是分配CPU的基本单位
+
+    * Thread的生命周期
+        * 新建
+        * 就绪
+        * 运行
+        * 死亡
+        * 阻塞
+    * Thread无法控制
+        * 如果执行Thread的Activity销毁之后，Thread就变成野线程了，无法对其进行状态监听和控制
+        * 场景：Thread需要连续不停地每隔一段时间就要连接服务器做一次同步（可以在Service里面创建Thread并控制它）
+
+* service和Thread的区别
+    * 定义  service运行在主线程 Thread相对独立
+    * 实际开发  Thread执行耗时操作
+    * 应用场景  Service后台播放音乐 天气预报通知 数据统计
+
+### Service和IntentService的区别
+
+### 开启service的两种方式以及区别
+
 #####1 startService 
+
 通过startService方法启动Service会回调onStartCommand
 
 * 定义一个类继承Service
@@ -64,12 +126,49 @@ Service是一个一种可以在后台执行长时间运行操作而没有用户�
 * 不再使用时，调用stopService(Intent)方法停止该Service
 
 #####2 bindService
+
 * 创建BindService服务端，继承自Service并在类中，创建一个实现IBinder接口的实例对象并提供公共方法给客户端调用
 * 从onBind()回调方法返回次Binder实例
 * 在客户端中，从onServiceConnected()回调方法接收Binder并使用提供的方法调用绑定服务
 
-### Broadcast receiver
-#### 广播
+### 启动服务和绑定服务先后次序问题
+
+### 序列化：Parcelable和Serializable
+
+### Binder
+
+## Fragment
+
+### Fragment为什么被称为第五大组件
+
+* 使用频率高
+* 有自己的生命周期
+* 动态灵活加载到activity中
+	* 依附activity
+	
+### Fragment加载到Activity的两种方式
+
+* 添加Fragment到Activity布局文件中
+* 动态在activity中添加fragment
+
+### FragmentPagerAdapter和FragmentStatePagerAdapter区别
+
+* FragmentPagerAdapter页面较少  销毁时调用detach UI分离
+* FragmentStatePagerAdapter页面较多 销毁时调用remove 回收内存
+
+### Fragment生命周期
+
+### Fragment通信
+
+* 在Fragment中调用Activity的方法 getActivity()
+* 在Activity中调用Fragment中方法 接口回调
+* 在Fragment中调用Fragment中方法 findFragmentById
+### Fragment的replace、add、remove
+
+## Broadcast receiver
+
+### 广播
+
 ##### 广播的定义
 在Android中，Broadcast是一种广泛运用的在应用程序之间传输信息的机制，Android中我们要发送的广播是一个Intent，这个Intent中可以携带我们要传送的数据
 
