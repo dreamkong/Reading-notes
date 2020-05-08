@@ -86,7 +86,7 @@ Android系统通过Activity栈的形式来管理Activity
 
 ![Service生命周期](./img/service_lifecycle.png)
 
-### service的应用场景，以及和Thread区别
+### Service的应用场景，以及和Thread区别
 
 * Service是什么
 
@@ -107,12 +107,19 @@ Android系统通过Activity栈的形式来管理Activity
         * 如果执行Thread的Activity销毁之后，Thread就变成野线程了，无法对其进行状态监听和控制
         * 场景：Thread需要连续不停地每隔一段时间就要连接服务器做一次同步（可以在Service里面创建Thread并控制它）
 
-* service和Thread的区别
+* Service和Thread的区别
     * 定义  service运行在主线程 Thread相对独立
     * 实际开发  Thread执行耗时操作
     * 应用场景  Service后台播放音乐 天气预报通知 数据统计
 
 ### Service和IntentService的区别
+
+* 不建议在Service中编写耗时的逻辑和操作，否则会引起ANR
+
+* IntentService内部有一个工作线程HandlerThread来处理耗时操作，同时只会执行一个工作线程，开启多次会加入线程队列
+* IntentService是继承并处理异步请求的一个类
+* 内有一个工作线程来处理耗时操作
+* IntentService内部则是通过消息的方式发送给HandlerThread的，然后由Handler中的Looper来处理消息
 
 ### 开启service的两种方式以及区别
 
@@ -133,9 +140,74 @@ Android系统通过Activity栈的形式来管理Activity
 
 ### 启动服务和绑定服务先后次序问题
 
-### 序列化：Parcelable和Serializable
+* 先绑定服务再启动服务
+    * 退出当前Activity，会调用onUnbind但不会销毁
 
-### Binder
+* 先启动服务再绑定服务
+    * 退出当前Activity，会调用onUnbind但不会销毁
+
+绑定服务是依托绑定的Activity，而启动服务则是依托自身Service
+
+启动服务的优先级比绑定服务高
+
+服务在其托管进程的主线程中运行（UI线程）
+
+## 序列化：Parcelable和Serializable
+
+序列化：内存中对象->磁盘
+
+反序列化：磁盘中对象->内存
+
+### Serializable
+
+* Java中提供的序列化接口
+* 性能低，内存开销大
+
+### Parcelable
+
+* Android中提供的序列化接口
+* 内存开销小
+
+### 总结
+
+* 两者实现差异
+* 两者效率对比
+* 存储到存储设备上推荐Serializable
+* 在内存中传递推荐Parcelable
+
+## Binder
+
+### AIDL
+
+进程间通信（IPC）机制
+
+1. 创建AIDL：实体对象、新建AIDL文件、make工程
+2. 服务端：新建Service、创建Binder对象、定义方法
+3. 客户端：实现serviceConnection、BindService
+
+### Linux内核基础知识
+
+* 进程隔离/虚拟地址空间
+* 系统调用 
+* Binder驱动
+
+### Binder通信机制
+
+##### 为什么使用Binder
+
+* Android使用的Linux内核拥有着很多的跨进程通信机制
+* 性能
+* 安全
+
+##### Binder通信模型
+
+* 通信录：binder驱动
+
+##### 到底什么是binder
+
+* 通常意义下，Binder是一种通信机制
+* 对于Service进程来说，Binder指的是Binder本地对象/对与Client来说，Binder指的是Binder代理对象
+* 对于传输过程而言，Binder是可以跨进程传递的对象
 
 ## Fragment
 
@@ -173,20 +245,26 @@ Android系统通过Activity栈的形式来管理Activity
 在Android中，Broadcast是一种广泛运用的在应用程序之间传输信息的机制，Android中我们要发送的广播是一个Intent，这个Intent中可以携带我们要传送的数据
 
 ##### 广播的使用场景
-* 同一app具有多个进程的不同组件之间的消息通信
-* 不同app之间的组件之间消息通信
+* 同一App具有多个进程的不同组件之间的消息通信
+* 不同App之间的组件之间消息通信
 
 ##### 广播种类
 * Normal Broadcast：Context.sendBroadcast
 * System Broadcast: Context.sendOrderedBaoadcast
-* Local Broadcast: 只在自身app内传播
+* Local Broadcast: 只在自身App内传播
 
 #### 实现广播-receiver
 #####静态注册
-* 注册完成就一直运行
+
+* 在AndroidManifest.xml里通过`<receiver>`标签声明
+
+* 注册完成就一直运行，常驻进程中，不受组件生命周期影响
 
 #####动态注册
-* 跟随activity的生命周期 在onDestroy解绑广播
+
+* 在代码中国调用Context.registerReceiver
+
+* 跟随组件的生命周期，在onResume中注册 在onPause注销广播 防止内存泄漏，onPause一定会执行，onStop、onDestroy不一定会执行
 
 #### 内部实现机制
 * 自定义广播接受者BroadcastReceiver,并复写onReceive()方法
@@ -197,7 +275,7 @@ Android系统通过Activity栈的形式来管理Activity
 
 #### LocalBroadcastManger详解
 * 使用它发送的广播将只在自身app内传播，因此你不必担心泄露隐私数据
-* 其他app无法对你的app发送该广播，因为你的app根本就不可能接收到非自身应用发送的的该广播
+* 其他App无法对你的App发送该广播，因为你的App根本就不可能接收到非自身应用发送的的该广播
 * 比系统的全局广播更加高效
 
 ##### 源码
@@ -208,35 +286,16 @@ Android系统通过Activity栈的形式来管理Activity
 ### Webview
 #### Webview常见的一些坑
 * Android API level 16以及之前的版本存在远程代码执行安全漏洞，该漏洞源于程序没有正确限制使用WebView.addJavascriptInterface方法，远程攻击者可通过使用Java Reflection API利用该漏洞执行任意Java对象的方法
-* webview在布局文件的使用：webview写在其他容器时 销毁webview时候 先移除容器中的webview 在调用webview.removeAllView destroy
+* Webview在布局文件的使用：Webview写在其他容器时 销毁Webview时候 先移除容器中的Webview 在调用Webview.removeAllView destroy
 * jsbridge 
 * webviewClient.onPageFinished->webChromeClient.onProgressChanged
 * 后台耗电 onDestroy 调用System.exit(0);
-* webview硬件加速导致页面渲染问题 android3.0开始  解决办法 关闭硬件加速
+* Webview硬件加速导致页面渲染问题 android3.0开始  解决办法 关闭硬件加速
 
-#### 关于webview的内存泄漏问题
+#### 关于Webview的内存泄漏问题
 * 独立进程，简单暴力，不过可能涉及到进程间通信
-* 动态添加webview，对传入webview中使用的context使用弱引用，动态添加webview意思在布局创建个ViewGroup用来放置webview，Activity创建时add进来，在Activity停止时remove掉
+* 动态添加Webview，对传入Webview中使用的context使用弱引用，动态添加Webview意思在布局创建个ViewGroup用来放置webview，Activity创建时add进来，在Activity停止时remove掉
 
-### Binder
-#### Linux内核基础知识
-* 进程隔离/虚拟地址空间
-* 系统调用 
-* binder驱动
-#### Binder通信机制
-##### 为什么使用Binder
-* Android使用的Linux内核拥有着很多的跨进程通信机制
-* 性能
-* 安全
-
-##### Binder通信模型
-* 通信录：binder驱动
-
-##### 到底什么是binder
-* 通常意义下，Binder是一种通信机制
-* 对于Service进程来说，Binder指的是Binder本地对象/对与Client来说，Binder指的是Binder代理对象
-* 对于传输过程而言，Binder是可以跨进程传递的对象
-#### AIDL
 ### Handler
 #### 什么是Handler
 handler通过发送和处理Message和Runnable对象来关联对应线程的MessageQueue
