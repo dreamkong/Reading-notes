@@ -979,8 +979,169 @@ public enum Size{
 
 * 接口的特性
 
-    * 虽然接口中不能包含实例域和静态方法，但可以包含常量，接口中的域将自动地被设为public static final
+    * 虽然接口中不能包含实例域和静态方法（Java8中允许在接口中增加静态方法），但可以包含常量，接口中的域将自动地被设为public static final
     * 接口可以多实现
 
 * 接口与抽象类
+
+    * 使用抽象类表示通用属性存在这样的一个问题：每个类只能扩展一个类
+
+* 静态方法
+
+    * Java 8出现
+    * 通常做法都是讲静态方法放在伴随类中。在标准库中，你会看到成对出现的接口和实用工具类，例如：Collection/Collections或Path/Paths
+
+* 默认方法
+
+    * 可以为接口提供一个默认实现
+    * 必须使用default修饰符标记
+
+* 解决默认方法冲突
+
+    如果现在一个接口中将一个方法定义为默认方法，然后又在超类或者另一个接口中定义了相同的方法，会怎么处理？
+
+    * 超类优先。如果超类提供了一个具体方法，同名而且有相同参数类型的默认方法会被忽略
+    * 接口冲突。如果一个超接口提供一个默认方法，另一个接口提供了一个同名且参数类型相同的方法，必须覆盖这个方法来解决冲突
+
+    一个类扩展了一个超类，同时实现了一个接口，并从超类和接口中继承了相同的方法，会怎么处理？
+
+    * 这种情况下，只会考虑超类方法。“类优先”原则
+
+### 接口示例
+
+* 接口与回调
+
+    回调（Callback）是一种常见的程序设计模式。在这种模式中，可以指出某个特定时间发生时应该采取的动作。
+
+* Comparator接口
+
+* 对象克隆
+
+    * Object.clone提供的浅拷贝
+    * 即使clone的默认（浅拷贝）实现能够满足要求，还是需要实现Cloneable接口，将clone重新定义为public，再调用super.clone()
+    * 如果在一个对象上调用clone，但这个对象的类并没有实现Cloneable接口，Object类的clone就会抛出一个CloneNotSupportedException
+
+    ```java
+    class Employee implements Cloneable{
+    	public Employee clone() throws CloneNotSupportedException{
+      	// 调用 Object.clone()
+        Employee cloned = (Employee)super.clone();
+        
+        // 克隆可变对象
+        cloned.hireDay = (Date)hireDay.clone();
+        
+        return cloned;
+    	}
+    }
+    ```
+
+    
+
+### lambda表达式
+
+* 为什么引入lambda表达式
+
+    * lambda表达式是一个可传递的代码块，可以在以后执行一次或多次
+    * 一直以来，在Java中传递一个代码块并不容易，不能直接传递代码块。
+
+* lambda表达式的语法
+
+    ```java
+    (String first, String second) ->{
+      if(first.length() < second.length()) return -1;
+      else if(first.length() > second.length()) return 1;
+    	else return 0;
+    }
+    
+    () -> {
+      for(int i = 0; i < 10; i++)System.out.println(i);
+    }
+    
+    (String first, String second) -> first.length() - second.length()
+    ```
+
+* 函数式接口
+
+    对于只有一个抽象方法的接口，需要这种接口的对象时，就可以提供一个lambda表达式。这种接口称为函数式接口（functional interface）。
+
+* 方法引用
+
+    ```java
+    Timer t = new Timer(1000, event -> System.out.println(event));
+    
+    // 直接将方法传递到Timer构造器
+    Timer t = new Timer(1000, System.out::println);
+    
+    Arrays.sort(strings, String::compareToIgnoreCase);
+    ```
+
+* 构造器引用
+
+* 变量作用域
+
+    * lambda表达式可以捕获外围作用域中变量的值
+    * lambda表达式中，只能引用值不会改变的变量
+
+* 处理lambda表达式
+
+* 再谈Comparator
+
+### 内部类
+
+内部类（inner class）是定义在另一个类中的类。
+
+* 为什么要使用内部类？
+    * 内部类方法可以访问该类定义所在的作用域中的数据，包括私有的数据
+    * 内部类可以对同一个包中的其他类隐藏起来
+    * 当想要定义一个回调函数且不想编写大量代码时，使用匿名内部类比较便捷
+
+* 使用内部类访问对象状态
+* 内部类的特殊语法规则
+    * 外部类引用`OuterClass.this`
+    * 在外部类的作用域外引用公有内部类`OuterClass.InnerClass`
+    * 内部类中声明的所有静态域都必须是final
+    * 内部类不能有static方法
+* 内部类是否有用、必要和安全
+    * 内部类是一种编译器现象，与虚拟机无关。编译器会把内部类翻译成用`$`分割外部类与内部类的常规类文件，而虚拟机则对此一无所知`OuterClass$InnerClass.class`
+
+* 局部内部类
+
+    * 局部类不能用public或private修饰
+    * 局部类有一个优势，即对外部类可以完全的隐藏起来
+
+    ```java
+    public void start(){
+      class TimePrinter implements ActionListener{
+        public void actionPerformed(ActionEvent event){
+          System.out.println("At the tone, the time is " + new Date());
+          if(beep)Toolkit.getDefaultToolkit().beep();
+        }
+      }
+    }
+    ```
+
+* 由外部方法访问变量
+
+    * 与其他内部类相比较，局部类还有一个优点。它们不仅能够访问包含它们的外部类，还可以访问局部变量。不过，那些局部变量必须事实上为final。这说明，它们一旦赋值就绝不会改变。
+
+* 匿名内部类
+
+    假如只创建这个类的一个对象，就不必命名了。这种类被称为匿名内部类（anonymous inner class）。
+
+    ```java
+    // 通常语法格式
+    new SuperType(construction parameters){
+      inner class methods and data
+    }
+    ```
+
+* 静态内部类
+
+    有时候，使用内部类只是为了把一个类隐藏在另一类的内部，并不需要引用外部类的对象。为此，可以将内部内声明为static，以便取消产生的引用。
+
+    * 在内部类不需要访问外部类对象的时候，应该使用静态内部类。有些程序员用嵌套类（nested class）表示静态内部类
+    * 与常规内部类不同，静态内部类可以有静态域和方法
+    * 声明在接口中的内部类自动成为static和public类
+
+### 代理
 
