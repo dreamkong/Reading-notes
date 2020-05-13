@@ -201,9 +201,9 @@ Android系统通过Activity栈的形式来管理Activity
 
 ##### Binder通信模型
 
-* 通信录：binder驱动
+* 通信录：Binder驱动
 
-##### 到底什么是binder
+##### 到底什么是Binder
 
 * 通常意义下，Binder是一种通信机制
 * 对于Service进程来说，Binder指的是Binder本地对象/对与Client来说，Binder指的是Binder代理对象
@@ -215,13 +215,13 @@ Android系统通过Activity栈的形式来管理Activity
 
 * 使用频率高
 * 有自己的生命周期
-* 动态灵活加载到activity中
-	* 依附activity
+* 动态灵活加载到Activity中
+	* 依附Activity
 	
 ### Fragment加载到Activity的两种方式
 
 * 添加Fragment到Activity布局文件中
-* 动态在activity中添加fragment
+* 动态在Activity中添加Fragment
 
 ### FragmentPagerAdapter和FragmentStatePagerAdapter区别
 
@@ -262,7 +262,7 @@ Android系统通过Activity栈的形式来管理Activity
 
 #####动态注册
 
-* 在代码中国调用Context.registerReceiver
+* 在代码中调用Context.registerReceiver
 
 * 跟随组件的生命周期，在onResume中注册 在onPause注销广播 防止内存泄漏，onPause一定会执行，onStop、onDestroy不一定会执行
 
@@ -283,8 +283,10 @@ Android系统通过Activity栈的形式来管理Activity
 * 既然是它内部通过Handler来实现广播的发送的，那么相比系统广播通过Binder实现那肯定是更高效了，同时使用Handler来实现，别的应用无法向我们的应用发送该广播，而我们应用发送的广播也不会离开我们的应用
 * LocalBroadcastManger内部协作主要是靠这两个Map集合：mReceivers和mActions，当然还有一个List集合mPendingBroadcasts，这个主要是存储待接收的广播对象
 
-### Webview
-#### Webview常见的一些坑
+## Webview
+
+### Webview常见的一些坑
+
 * Android API level 16以及之前的版本存在远程代码执行安全漏洞，该漏洞源于程序没有正确限制使用WebView.addJavascriptInterface方法，远程攻击者可通过使用Java Reflection API利用该漏洞执行任意Java对象的方法
 * Webview在布局文件的使用：Webview写在其他容器时 销毁Webview时候 先移除容器中的Webview 在调用Webview.removeAllView destroy
 * jsbridge 
@@ -292,26 +294,42 @@ Android系统通过Activity栈的形式来管理Activity
 * 后台耗电 onDestroy 调用System.exit(0);
 * Webview硬件加速导致页面渲染问题 android3.0开始  解决办法 关闭硬件加速
 
-#### 关于Webview的内存泄漏问题
+### 关于Webview的内存泄漏问题
+
 * 独立进程，简单暴力，不过可能涉及到进程间通信
 * 动态添加Webview，对传入Webview中使用的context使用弱引用，动态添加Webview意思在布局创建个ViewGroup用来放置webview，Activity创建时add进来，在Activity停止时remove掉
 
-### Handler
-#### 什么是Handler
-handler通过发送和处理Message和Runnable对象来关联对应线程的MessageQueue
+## Handler
+
+Android SDK提供给开发者方便进行异步消息处理的类
+
+### 什么是Handler
+
+Handler通过发送和处理Message 和 Runnable对象来关联对应线程的MessageQueue
 * 可以让对应的Message和Runnable在未来的某个时间点进行相应处理
 * 让自己想要处理的耗时操作放在子线程，让更新ui的操作放在主线程
 
-#### Handler的使用方法
+### Handler的使用方法
+
 * post(runnable) 底层还是调用sendMessage
 * sendMessage(message)
 
-#### Handler机制的原理
-#### Handler引起的内存泄漏以及解决办法
-* 原因：静态内部类持有外部类的匿名引用，导致外部activity无法释放
+### Handler机制的原理
+
+Handler在主线程创建一个Looper（`mLooper = Looper.myLooper();`），然后再Looper内部创建一个MessageQueue队列，创建Handler的时候会取出当前线程的Looper对象，通过这个Looper不断轮询MessageQueue中的Message，然后交给Handler处理
+
+### Handler引起的内存泄漏以及解决办法
+
+* 原因：静态内部类持有外部类的匿名引用，导致外部Activity无法释放
 	* handler内部持有外部activity的弱引用
 	* 把handler改为static内部类
 	* onDestroy时候mHandler.removeCallback()
+
+### Handler总结
+
+* Looper类主要是为每个线程开启单独的消息循环
+* Handler是Looper的一个接口
+* 在非主线程直接new Handler()
 
 ### AsyncTask
 #### 什么是AsyncTask
