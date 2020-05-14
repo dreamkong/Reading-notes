@@ -23,7 +23,7 @@ Android系统通过Activity栈的形式来管理Activity
 	* 点Home回到主界面(Activity不可见)->onPause->onStop
 	* 再次回到原Activity->onRestart(不可见->可见)->onStart->onResume
 	* 退出当前Activity->onPause->onStop->onDestroy
-	* 异常终止的时候onSaveInstanceState（Android3.0之前onResume之后调用，3.0之后onPause之后调用，9.0之后onStop之后调用）自动调用保存数据，onRestoreInstanceState方法恢复数据
+	* 异常终止的时候onSaveInstanceState（Android3.0之前onResume之后调用，3.0之后onPause之后调用，9.0之后onStop之后调用）自动调用保存数据，onRestoreInstanceState（onStart之后）方法恢复数据
 	
 * Android进程优先级
 	* 前台
@@ -303,6 +303,8 @@ Android系统通过Activity栈的形式来管理Activity
 
 Android SDK提供给开发者方便进行异步消息处理的类
 
+![](./img/handler.png)
+
 ### 什么是Handler
 
 Handler通过发送和处理Message 和 Runnable对象来关联对应线程的MessageQueue
@@ -333,7 +335,13 @@ Handler在主线程创建一个Looper（`mLooper = Looper.myLooper();`），然�
 
 ### AsyncTask
 #### 什么是AsyncTask
-它本质上就是一个封装了线程池和handler的异步框架
+它本质上就是一个封装了线程池和Handler的异步框架
+
+* AsyncTask的实例必须在主线程中创建
+* AsyncTask的execute方法必须在主线程中调用
+* 回调方法，Android会自动调用
+* 一个AsyncTask的实例，只能执行一次execute方法
+
 #### AsyncTask的使用方法
 * 3个参数
 	* Integer 
@@ -351,17 +359,20 @@ Handler在主线程创建一个Looper（`mLooper = Looper.myLooper();`），然�
 * 生命周期
 	* 在onDestroy 中销毁AsyncTask
 * 结果丢失
-	* 屏幕旋转等导致activity被重新创建 导致AsyncTask的引用无效
+	* 屏幕旋转等导致Activity被重新创建 导致AsyncTask的引用无效
 * 并行or串行
+    * 默认串行
 
-### handlerThread
-#### handlerThread是什么
-handler+thread+looper
-是一个thread 内部有looper
+## HandlerThread
+
+### HandlerThread是什么
+
+Handler+Thread+Looper
+是一个Thread 内部有Looper
 
 * 本质上是一个线程类，继承了Thread
 * 有自己的内部Looper对象，可以进行looper循环 
-* 通过获取HandlerThread的looper对象传递给Handler对象，可以在handlerMessage方法中执行异步任务
+* 通过获取HandlerThread的Looper对象传递给Handler对象，可以在handlerMessage方法中执行异步任务
 * 优点是不会有堵塞，减少了对性能的消耗，缺点是不能同时进行多任务的处理，需要等待进行处理，处理效率低
 * 与线程池注重并发不同，HandlerThread是一个串行队列，HandlerThread背后只有一个线程
 	
