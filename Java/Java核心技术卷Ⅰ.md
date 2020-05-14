@@ -993,6 +993,7 @@ public enum Size{
 
 * 默认方法
 
+    * Java 8出现
     * 可以为接口提供一个默认实现
     * 必须使用default修饰符标记
 
@@ -1183,3 +1184,34 @@ public enum Size{
         * 试图根据给定的字符串查找Class对象，而这个字符串表示的类不存在
 
     如果出现RuntimeException异常，那么就一定是你的问题。
+
+    Java语言规范将派生于Error类或RuntimeException类的所有异常称为非受查（unchecked）异常，所有其他异常被称为受查（checked）异常。
+
+* 声明受查异常
+
+    一个方法不仅需要告诉编译器将要返回什么值，还要告诉编译器有可能发生什么错误。
+
+    `public FileInputStream(String name) throws FileNotFoundException`
+
+    总之，一个方法必须声明所有可能抛出的受查异常，而非受查异常要么不可控制（Error），要么就应该避免发生（RuntimeException）。
+
+* 如何抛出异常
+
+    * 找到一个合适的异常类
+    * 创建这个类的一个对象
+    * 将对象抛出
+
+* 创建异常类
+
+    ```java
+    class FileFormatException extends IOException{
+      // 习惯上，定义的类应该包含两个构造器，一个是默认的构造器；另一个是带有详细描述信息的构造器（超类Throwable的toString方法将会打印出这些详细信息，这在调试中非常有用）。
+      public FileFormatException(){}
+      public FileFormatException(String gripe){
+        super(gripe);
+      }
+    }
+    ```
+
+### 捕获异常
+
