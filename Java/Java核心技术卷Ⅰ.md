@@ -1457,6 +1457,138 @@ public enum Size{
 
 * 如果使用-Xprof标志运行Java虚拟机，就会运行一个基本的剖析器来跟踪那些代码中经常被调用的方法。
 
+## 第8章 泛型程序设计
+
+### 为什么要使用泛型程序设计
+
+泛型程序设计（Generic programming）意味着编写的代码可以被很多不同类型的对象所重用。
+
+* 类型参数的好处
+
+    在Java中增加泛型类之前，泛型程序设计使用继承实现的。ArrayList类只维护一个Object引用的数组。这种方法有两个问题：
+
+    * 当获取一个值时必须进行强制类型转换
+    * 没有错误检查。可以向数组列表中添加任何类的对象
+
+    泛型提供了一个更好的解决方案：类型参数（type parameters）。ArrayList类有一个类型参数用来指示元素的类型：`ArrayList<String> files = new ArrayList<String>();`
+
+    泛型参数的魅力在于使得程序具有更好的可读性和安全性。
+
+* 谁想成为泛型程序员
+
+### 定义简单泛型类
+
+```java
+public class Pair<T>{
+  private T first;
+  private T second;
+  
+  public Pair(){
+    first = null;
+    second = null;
+  }
+  public Pair(T first, T second){
+    this.first = first;
+    this.second = second;
+  }
+  
+  public T getFirst(){
+    return first;
+  }
+  public T getSecond(){
+    return second;
+  }
+  
+  public void setFirst(T first){
+    this.first = first;
+  }
+  public void setSecond(T second){
+    this.second = second;
+  }
+}
+```
+
+### 泛型方法
+
+```java
+class ArrayAlg{
+  public static <T> T getMiddle(T... a){
+    return a[a.length / 2]
+  }
+}
+```
+
+### 类型变量的限定
+
+`public static <T extends Comparable> T min(T[] a){}`
+
+`T extends Comparable & Serializable`
+
+在Java的继承中，可以根据需要拥有多个接口超类型，但限定中至多有一个类。如果用一个类作为限定，它必须是限定列表中的第一个。
+
+### 泛型代码和虚拟机
+
+* 类型擦除
+
+    无论何时定义一个泛型类型，都自动提供了一个相应的原始类型（raw type）。原始类型的名字就是删去类型参数后的泛型类型名。擦除（erased）类型变量，并替换为限定类型（无限定的变量用Object）。
+
+    例如：`Pari<T>`的原始类型如下所示
+
+    ```java
+    public class Pair<Object>{
+      private Object first;
+      private Object second;
+      
+      public Pair(){
+        first = null;
+        second = null;
+      }
+      public Pair(Object first, Object second){
+        this.first = first;
+        this.second = second;
+      }
+      
+      public Object getFirst(){
+        return first;
+      }
+      public Object getSecond(){
+        return second;
+      }
+      
+      public void setFirst(Object first){
+        this.first = first;
+      }
+      public void setSecond(Object second){
+        this.second = second;
+      }
+    }
+    ```
+
+* 翻译泛型表达式
+
+    当程序调用泛型方法时，如果擦除返回类型，编译器插入强制类型转换。
+
+* 翻译泛型方法
+
+    `public static <T extends Comparable> T min(T[] a)`
+
+    擦除后
+
+    `public static Comparable min(Comparable[] a)`
+
+    有关Java泛型转换的事实：
+
+    * 虚拟机中没有泛型，只有普通的类和方法
+    * 所有的类型参数都用它们的限定类型替换
+    * 桥方法被合成来保持多态
+    * 为保持类型安全性，必要时插入强制类型转换
+
+* 调用遗留代码
+
+    
+
+
+
 
 
 
