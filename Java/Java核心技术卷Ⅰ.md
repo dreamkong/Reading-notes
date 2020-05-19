@@ -1215,3 +1215,249 @@ public enum Size{
 
 ### 捕获异常
 
+* 捕获异常
+
+    ```java
+    try{
+      code;
+      more code;
+    }catch(ExceptionType e){ 
+      handler for this type
+    }
+    ```
+
+    如果编写一个覆盖超类的方法，这个方法又没有抛出异常，那么这个方法就必须捕获方法代码中出现的每一个受查异常。不允许在子类的throws说明符中出现超过超类方法所列出的异常类范围。
+
+* 捕获多个异常
+
+    ```java
+    try{
+      code;
+    }catch(ExceptionType e){
+      code;
+    }catch(ExceptionType e){
+      code;
+    }catch(ExceptionType | ExceptionType e){ // 一个catch捕获多个异常 e为final变量 Java7出现
+      code;
+    }
+    ```
+
+* 再次抛出异常与异常链
+
+    在catch子句里面可以抛出一个异常，这样做的目的是改变异常的类型。
+
+* finally子句
+
+    不管是否有异常被捕获，finally子句中的代码都被执行。
+
+    ```java
+    try{
+      
+    }catch(Exception e){
+      
+    }finally{
+      
+    }
+    ```
+
+    Tip：这里，强烈建议解耦合try/catch和try/finally语句块。
+
+    ```java
+    InputStream in = ...
+    try{
+      try{
+        code that might throw exception
+      }finally{
+        in.close()
+      }
+    }catch(IOException e){
+      show error message
+    }
+    ```
+
+    内层的try语句块只有一个职责，就是确保关闭输入流。外层的try语句块也只有一个职责，就是确保报告出现的错误。这种设计方式不仅清楚，而且还有一个功能，就是会报告finally子句中出现的错误。
+
+    当finally子句中也有一个return语句，这个返回值将会覆盖原始的返回值。
+
+* 带资源的try语句
+
+    ```java
+    try(Scanner in = new Scanner(new FileInputStream("usr/share/dict/words"),"UTF-8");
+        PrintWriter out = new PrintWriter("out.txt")){
+      while(in.hasNext()){
+        out.println(in.next().toUpperCase());
+      }
+    }
+    ```
+
+* 分析堆栈轨迹元素
+
+    堆栈轨迹（stack trace）是一个方法调用过程的列表，它包含了程序执行过程中方法调用的特定位置。
+
+### 使用异常机制的技巧
+
+* 异常处理不能代替简单的测试
+
+* 不要过分地细化异常
+
+* 利用异常层次结构
+
+    不要只抛出RuntimeException异常。应该寻找更加适当的子类或创建自己的异常类。
+
+* 不要压制异常
+
+    有些方法可能一百年才抛出一个异常，所以不用throws抛出，直接在方法里面try/catch
+
+* 在检测错误时，“苛刻”要比放任更好
+
+* 不要羞于传递异常
+
+### 使用断言
+
+* 断言的概念
+
+    `assert 条件;`
+
+    `assert 条件:表达式;`
+
+* 启用和禁用断言
+
+    `java -enableassertions MyApp`
+
+    `java -ea Myapp`
+
+    `java -de Myapp`
+
+    `java -ea:MyClass -ea:com.dk.mylib`
+
+    启用或禁用断言是类加载器（class loader）的功能。当断言被禁用时，类加载器将跳过断言代码，因此，不会降低程序运行的速度。
+
+* 使用断言完成参数检查
+
+    * Java语言中给出的3种处理系统错误的机制：
+        * 抛出一个异常
+        * 日志
+        * 使用断言
+    * 什么时候使用断言
+        * 断言失败时致命的，不可恢复的错误
+        * 断言检查只用于开发和测试阶段（这种做法被戏称为“在靠近海岸的时候穿上救生衣，但在海中央的时候就把救生衣脱掉吧”）
+
+* 为文档假设使用断言
+
+### 记录日志
+
+* 记录日志API的优点
+
+    * 可以很容易地取消全部日志记录，或者仅仅取消某个级别的日志，而且打开和关闭这个惭怍也很容易。
+    * 可以很简单地禁止日志记录的输出，因此，将这些日志代码留在程序中的开销很小。
+    * 日志记录可以被定向到不同的处理器，用于在控制台中显示，用于存储在文件中等。
+    * 日志记录器和处理器都可以对记录进行过滤。过滤器可以根据过滤实现器指定的标准丢弃那些无用的记录项。
+    * 日志记录可以采用不同的方式格式化，例如，纯文本或者XML。
+    * 应用程序可以使用多个日志记录器，他们使用类似包名的这种层次结构的名字，例如：“com.dk.myapp”。
+    * 在默认情况下，日志系统的配置由配置文件控制。如果需要的话，应用程序可以替换这个配置。
+
+* 基本日志
+
+    `Logger.getGlobal().info("File->Open menu item selected");`
+
+    `Logger.getGlobal().setLevel(Level.OFF);`
+
+* 高级日志
+
+    `private static final Logger myLogger = Logger.getLogger("com.dk.myapp");`
+
+    日志的7个级别：
+
+    * SEVERE
+    * WARNING
+    * INFO
+    * CONFIG
+    * FINE
+    * FINER
+    * FINEST
+
+    设置级别
+
+    FINE和更高级别的记录都可以记录下来了。
+
+    `logger.setLevel(Level.FINE);`
+
+    `logger.warning(message);`
+
+    `logger.fine(message);`
+
+    `logger.log(Level.FINE, message)`
+
+    默认的日志记录将显示包含日志调用的类名和方法名，如同堆栈所显示的那样。但是，如果虚拟机对执行过程进行了优化，就得不到准确的调用信息。此时，可以调用logp方法获得调用类和方法的确切位置，这个方法的签名为：
+
+    `void logp(Level l, String className, String methodName, String message)`
+
+* 修改日志管理器配置
+
+    默认位置：jre/lib/logging.properties
+
+    如果想使用另一个配置文件：java -Djava.util.logging.config.file=configFile MainClass
+
+* 本地化
+
+* 处理器
+
+* 过滤器
+
+* 格式化器
+
+* 日志记录说明
+
+    * 为一个简单的应用程序，选择一个日志记录器，并把日志记录器命名为与主应用程序包一样的名字
+
+        `private static final Logger logger = Logger.getLogger("com.dk.myapp");`
+
+    * 默认的日志配置将级别等于或高于INFO级别的所有消息记录到控制台
+
+    * 现在，可以记录自己想要的内容了。但需要牢记：所有级别为INFO、WARNING和SEVERE的消息都将显示到控制台上。因此，最好只将对程序用户有意义的消息设置为这几个级别。将程序员想要的日志记录，设定为FINE是一个很好的选择
+
+### 调试技巧
+
+* 可以用下面的方法打印或者记录任意变量的值
+
+    * `System.out.println(x)`
+    * `Logger.getGlobl().info(x)`
+
+* 一个不太为人所知但却非常有效的技巧是在每一个类中放置一个单独的man方法。这样就可以对每一个类进行单元测试
+
+* JUnit单元测试框架
+
+* 日志代理（logging proxy）是一个子类的对象，它可以截获方法调用，并进行日志记录，然后调用超类中的方法
+
+* 利用Throwable类提供的printStackTrace方法，可以从任何一个异常对象中获得堆栈情况
+
+* 一般来说，堆栈轨迹显示在System.err上。
+
+* 通常，将一个程序中的错误信息保存在一个文件中是非常有用的。
+
+    `java MyProgram 2> errors.txt`
+
+    想在一个文件中同时捕获System.err和System.out，需要使用下面这条命令
+
+    `java MyProgram 1> errors.txt 2>&1`
+
+* 让非捕获异常的堆栈轨迹出现在System.err中并不是一个很理想的方法。如果在客户端偶然看到这些消息，则会感到迷惑，并且在需要的时候也无法实现诊断目的。比较好的方式是将这些内容记录到一个文件中。可以调用静态的Thread.setDefaultUncaughtExceptionHandler方法改变非捕获异常的处理器
+
+* 要想观察类的加载过程，可以verbose标志启动Java虚拟机
+
+* -Xlint选项告诉编译器对一些普遍容易出现的代码问题进行检查
+
+    例如：`javac -Xlint:fallthrough`
+
+    当switch语句中缺少break语句时，编译器就会给出报告
+
+* Java虚拟机增加了对Java应用程序进行监控（monitoring）和管理（management）的支持。它允许利用虚拟机中的代理装置跟踪内存消耗、线程使用、类加载等情况。这个功能对于像应用程序服务器这样大型的、长时间运行的Java程序来说特别重要。下面是一个能够展示这种功能的例子：JDK加载了一个称为jconsole的图形工具，可以用于显示虚拟机性能的统计结果。找出运行虚拟机的操作系统进程的ID。在UNIX/Linux环境下，运行ps实用工具，在Windows环境下，使用任务管理器。然后运行jconsole程序
+
+* 可以使用jmap实用工具获得一个堆的转储
+
+* 如果使用-Xprof标志运行Java虚拟机，就会运行一个基本的剖析器来跟踪那些代码中经常被调用的方法。
+
+
+
+
+
