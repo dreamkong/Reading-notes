@@ -1103,8 +1103,9 @@ public enum Size{
     * 内部类中声明的所有静态域都必须是final
     * 内部类不能有static方法
 * 内部类是否有用、必要和安全
-    * 内部类是一种编译器现象，与虚拟机无关。编译器会把内部类翻译成用`$`分割外部类与内部类的常规类文件，而虚拟机则对此一无所知`OuterClass$InnerClass.class`
-
+    
+* 内部类是一种编译器现象，与虚拟机无关。编译器会把内部类翻译成用`$`分割外部类与内部类的常规类文件，而虚拟机则对此一无所知`OuterClass$InnerClass.class`
+    
 * 局部内部类
 
     * 局部类不能用public或private修饰
@@ -1558,12 +1559,9 @@ class ArrayAlg{
       public void setFirst(Object first){
         this.first = first;
       }
-      public void setSecond(Object second){
-        this.second = second;
-      }
-    }
+      public void setSecond(
     ```
-
+    
 * 翻译泛型表达式
 
     当程序调用泛型方法时，如果擦除返回类型，编译器插入强制类型转换。
@@ -1585,7 +1583,104 @@ class ArrayAlg{
 
 * 调用遗留代码
 
+### 约束与局限性
+
+* 不能用基本类型实例化类型参数
+
+    没有`Pari<double>` 只有`Pari<Double>`，其原因是类型擦除。擦除之后，Pari类只含有Object类型的域，而Object不能存储double值
+
+* 运行时类型查询只适用于原始类
+
+    ```java
+    //Error
+    if(a instanceof Pari<String>)
+    //Error
+    if(a instanceof Pari<T>)
+      
+    Pair<String> stringPair = ...;
+    Pari<Employee> employeePair = ...;
+    // true 都返回Pair.class
+    if(stringPair.getClass() == employeePair.getClass())
+    ```
+
+* 不能创建参数化类型的数组
+
+    ```java 
+    //Error
+    Pair<String>[] table = new Pair<String>[10];
+    ```
+
+* Varargs警告
+
+    向参数个数可变的方法传递一个泛型类型的实例。为了调用这个方法，Java虚拟机必须建立一个`Pair<String>`数组，这就违反了前面的规则。不过，对于这种情况，规则有所放松，你只会得到一个警告，而不是错误。可以采用两种方法来抑制这个警告。一种方法是为包含addAll调用的方法增加注解@SuppressWarnings（"unchecked"）。或者在Java SE 7中，还可以用@SafeVarargs直接标注addAll方法
+
+    ```java
+    @SafeVarargs
+    public static <T> void addAll(Collection<T> coll, T... ts)
+    ```
+
+* 不能实例化类型变量
+
+    不能使用像new T()，new T[]或T.class这样的表达式中的类型变量。
+
+    ```java
+    // Error
+    public Pair(){
+      first = new T();
+      second = new T();
+    }
     
+    // Java SE8之后最好的解决办法是让调用者提供一个构造器表达式
+    Pair<String> p = Pair.makePair(String::new);
+    
+    public static <T> Pair<T> makePair(Supplier<T> constr){
+      return new Pair<>(constr.get(), constr.get());
+    }
+    ```
+
+* 不能构造泛型数组
+
+* 泛型类的静态上下文中类型变量无效
+
+* 不能抛出或捕获泛型类的实例
+
+* 可以消除对受查异常的检查
+
+* 注意擦除后的冲突
+
+### 泛型类型的继承规则
+
+### 通配符类型
+
+* 通配符概念
+
+    ```java
+    Pair<? extends Employee>
+    ```
+
+* 通配符的超类型限定
+
+    ```java
+    Pair<? super Manager>
+    ```
+
+* 无限定通配符
+
+    ```java
+    Pair<?>
+    ```
+
+* 通配符捕获
+
+### 反射和泛型
+
+* 泛型Class类
+* 使用`Class<T>`参数进行类型匹配
+* 虚拟机中的泛型类型信息
+
+## 第9章 集合
+
+
 
 
 
