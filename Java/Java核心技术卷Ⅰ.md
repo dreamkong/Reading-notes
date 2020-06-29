@@ -1103,9 +1103,9 @@ public enum Size{
     * 内部类中声明的所有静态域都必须是final
     * 内部类不能有static方法
 * 内部类是否有用、必要和安全
-    
+  
 * 内部类是一种编译器现象，与虚拟机无关。编译器会把内部类翻译成用`$`分割外部类与内部类的常规类文件，而虚拟机则对此一无所知`OuterClass$InnerClass.class`
-    
+  
 * 局部内部类
 
     * 局部类不能用public或private修饰
@@ -1680,9 +1680,93 @@ class ArrayAlg{
 
 ## 第9章 集合
 
+### Java集合框架
 
+* 将集合的接口与实现分离
 
+    * 队列Queue
 
+        队列接口指出可以在队列的尾部添加元素，在队列的头部删除元素，并且可以查找队列中元素的个数。当需要收集对象，并按照“先进先出”的规则检索对象时就应该使用队列。
+
+        ```java
+        public interface Queue<E>{
+          void add(E element);
+          E remove();
+          int size();
+        }
+        ```
+
+        这个接口并没有说明队列是如何实现的。队列通常有两种实现方式：一种是使用循环数组，另一种是使用链表。
+
+        ```java
+        public class CircleArrayQueue<E> implments Queue<E>{
+          private int head;
+          private int tail;
+          
+          CircleArrayQueue(int capacity){}
+          public void add(E element){}
+          public E remove(){}
+          public int size(){}
+          private E[] elements;
+        }
+        
+        public class LinkedQueue<E> implments Queue<E>{
+          private Link head;
+          private Link tail;
+          
+          LinkedQueue(){}
+          public void add(E element){}
+          public E remove(){}
+          public int size(){}
+        }
+        ```
+
+        实际上，Java类库没有名为CircleArrayQueue和LinkedQueue的类。这里只是解释一下集合接口与实现在概念上的不同。如果需要一个循环数组队列可以使用ArrayDeque类。如果需要一个链表队列可以使用LinkedList类，这个类实现了Queue接口。
+
+* Collection接口
+
+    在Java类库中，集合类的基本接口是Collection接口。
+
+* 迭代器
+
+    ```java
+    public interface Iterator<E>{
+      E next();
+      boolean hasNext();
+      void remove();
+      default void forEachRemaining(Consumer<? super E> action);
+    }
+    ```
+
+* 泛型实用方法
+
+    Java类库提供了一个类AbstractCollection，它将基础方法size和iterator抽象化了，但是在此提供了例行方法。
+
+* 集合框架中的接口
+
+    * Iterable
+        * Collection
+            * List
+            * Set
+                * SortedSet
+                    * NavigableSet
+            * Queue
+    * Map
+        * SortedMap
+            * NavigableMap
+    * Iterator
+        * ListIterator
+    * RandomAccess
+
+    集合有两个基本接口：Collection和Map。
+
+    List接口是一个有序集合（ordered collection）。元素可以添加到容器中的特定位置。可以采用两种方式访问元素：使用迭代器访问，或者使用一个整数索引访问。后一种方法称为随机访问（random access），因为这样可以按任意顺序访问元素。与之不同，使用迭代器访问时，必须顺序地访问元素。
+
+    ListIterator接口是Iterator的一个子接口。
+
+    Set接口等同于Collection接口，不过其方法的行为有更严谨的定义。
+
+### 具体的集合
 
 
 
