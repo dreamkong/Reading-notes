@@ -1843,3 +1843,34 @@ class ArrayAlg{
 * 标识散列映射
 
     类IdentityHashMap有特殊的作用。在这个类中，键的散列值不是用hashCode函数计算的，而是用System.identityHashCode方法计算的。
+
+### 视图与包装器
+
+* 轻量级集合包装器
+
+    Arrays类的静态方法asList将返回一个包装了普通java数组的List包装器。返回的对象不是ArrayList。它是一个视图对象，带有访问底层数组的get和set方法。改变数组大小的所有方法（例如与迭代器相关的add和remove方法）都会抛出一个Unsupported OperationException异常。
+
+* 子范围
+
+    可以为很多集合建立子范围（subrange）视图。
+
+* 不可修改的视图
+
+    Collections还有几个方法，用于产生集合的不可修改视图（unmodifiable views）。
+
+    由于视图只是包装了接口而不是实际的集合对象，所以只能访问接口中定义的方法。例如，LinkedList类有一些非常方便的方法，addFirst和addLast，它们都不是List接口的方法，不能通过不可修改视图进行访问。
+
+* 同步视图
+
+    类库的设计者使用视图机制来确保常规集合的线程安全，而不是实现线程安全的集合类。
+
+* 受查视图
+
+* 关于可选操作的说明
+
+### 算法
+
+
+
+
+
