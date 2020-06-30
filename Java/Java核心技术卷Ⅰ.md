@@ -1812,9 +1812,34 @@ class ArrayAlg{
 
 ### 映射
 
+映射用来存放键/值对。
 
+* 基本映射操作
 
+    Java类库为映射提供了两个通用的实现：HashMap和TreeMap。这两个类都实现了Map接口。
 
+* 更新映射项
 
+* 映射视图
 
+    * 键集 keySet()
+    * 值集 values()
+    * 键/值集 entrySet()
 
+* 弱散列映射
+
+    WeakHashMap完成这件事情。当对键的唯一引用来自散列条目时，这一数据结构将与垃圾回收器协同工作一起删除键/值对。
+
+* 链接散列集与映射
+
+    LinkedHashSet和LinkedHashMap类用来记住插入元素的顺序。
+
+* 枚举集与映射
+
+    EnumSet是一个枚举类型元素集的高效实现。
+
+    EnumMap是一个键类型为枚举类型的映射。
+
+* 标识散列映射
+
+    类IdentityHashMap有特殊的作用。在这个类中，键的散列值不是用hashCode函数计算的，而是用System.identityHashCode方法计算的。
