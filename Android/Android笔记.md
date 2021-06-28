@@ -1,5 +1,10 @@
 # Android笔记
 
+1. 选一个自己相对擅长的领域
+2. 基础要背
+3. 试着去了解这个领域市面上的技术
+4. 如果有时间的话，研究其中一个众所周知的库的源码
+
 ## Activity
 
 Activity是与用户交互的接口
@@ -10,9 +15,9 @@ Android系统通过Activity栈的形式来管理Activity
 
 * Activity4中状态
 	
-	* Active：Activity处于栈顶
-	* Paused：可见但不可交互
-	* Stopped：不可见（被完全覆盖 部分成员变量存在）
+	* Active：Activity处于栈顶、可见、可交互
+	* Paused：被非全屏Activity挡住，可见但不可交互
+	* Stopped：被完全覆盖、部分成员变量存在，不可见
 	* Killed：系统回收掉
 	
 * Activity生命周期
@@ -23,7 +28,7 @@ Android系统通过Activity栈的形式来管理Activity
 	* 点Home回到主界面(Activity不可见)->onPause->onStop
 	* 再次回到原Activity->onRestart(不可见->可见)->onStart->onResume
 	* 退出当前Activity->onPause->onStop->onDestroy
-	* 异常终止的时候onSaveInstanceState（Android3.0之前onResume之后调用，3.0之后onPause之后调用，9.0之后onStop之后调用）自动调用保存数据，onRestoreInstanceState（onStart之后）方法恢复数据
+	* 异常终止的时候onSaveInstanceState（Android3.0之前onResume之后调用，3.0之后onPause之后调用，9.0之后onStop之后调用）自动调用保存数据，onRestoreInstanceState（onStart之后）方法恢复数据，里面的Bundle参数一定不为空，onCreate里面的Bundle参数可能为空
 	
 * Android进程优先级
 	* 前台
@@ -31,7 +36,6 @@ Android系统通过Activity栈的形式来管理Activity
 	* 服务
 	* 后台
 	* 空
-	
 ### Android任务栈
 
 ![Androir任务栈](./img/android_task_stack.png)
@@ -217,7 +221,6 @@ Android系统通过Activity栈的形式来管理Activity
 * 有自己的生命周期
 * 动态灵活加载到Activity中
 	* 依附Activity
-	
 ### Fragment加载到Activity的两种方式
 
 * 添加Fragment到Activity布局文件中
@@ -375,6 +378,5 @@ Handler+Thread+Looper
 * 通过获取HandlerThread的Looper对象传递给Handler对象，可以在handlerMessage方法中执行异步任务
 * 优点是不会有堵塞，减少了对性能的消耗，缺点是不能同时进行多任务的处理，需要等待进行处理，处理效率低
 * 与线程池注重并发不同，HandlerThread是一个串行队列，HandlerThread背后只有一个线程
-	
 #### handlerThread源码  
 
