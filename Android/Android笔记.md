@@ -72,15 +72,24 @@ Android系统通过Activity栈的形式来管理Activity
 ### Activity启动模式
 
 * standard
-* singleTop栈顶复用 调用onNewInstance
+    * 在不指定启动模式的前提下，系统默认使用该模式启动Activity
+    * 每次启动一个Activity都会创建一个新的实例
+    * Activity它的onCreate(), onStart(), onResume()都会执行
+* singleTop栈顶复用 
+    * 当前栈中已有该Activity的实例并且该实例位于栈顶，不会创建新实例，调用onNewInstance()
+    * 当前栈中已有该Activity的实例并且该实例不位于栈顶，会创建新实例
+    * 当前栈中不存在该Activity的实例，会创建新实例
+    * 应用场景 IM对话框 新闻客户端推送
 * singleTask栈内复用 提到栈顶(此Activity)并移除在此之上的所有Activity 调用onNewInstance
     * 首先根据taskAffinity（默认为包名）去寻找当前是否存在一个对应名字的任务栈
     * 如果不存在，则会建一个新的Task
     * 如果存在，则得到该任务栈，查找该任务栈中是否存在该Activity
+    * 应用场景 应用主页面
 * singleInstance 独享一个栈
     * 以singleInstance模式启动Activity具有全局唯一性
     * 如果在启动这样的Activity时，已经存在了一个实例
     * 以singleInstance模式启动的Activity具有独占性
+    * 应用场景 呼叫来电  
 
 ### scheme协议
 
@@ -89,6 +98,11 @@ Android系统通过Activity栈的形式来管理Activity
 ### Service的生命周期
 
 ![Service生命周期](./img/service_lifecycle.png)
+
+* startService多次调用，onCreate只会执行一次，onStartCommand执行多次
+* stopService调用，内部会执行onDestroy方法，但如果bind后，调用stopService也不会停止服务，只用调用unBindService后才能停止服务
+* bindService调用后，onCreate->onBind
+* unBindService条用后，onUnbind->onDestroy
 
 ### Service的应用场景，以及和Thread区别
 
@@ -107,7 +121,7 @@ Android系统通过Activity栈的形式来管理Activity
         * 运行
         * 死亡
         * 阻塞
-    * Thread无法控制
+    * Thread的致命缺点：无法控制
         * 如果执行Thread的Activity销毁之后，Thread就变成野线程了，无法对其进行状态监听和控制
         * 场景：Thread需要连续不停地每隔一段时间就要连接服务器做一次同步（可以在Service里面创建Thread并控制它）
 
@@ -139,7 +153,7 @@ Android系统通过Activity栈的形式来管理Activity
 #####2 bindService
 
 * 创建BindService服务端，继承自Service并在类中，创建一个实现IBinder接口的实例对象并提供公共方法给客户端调用
-* 从onBind()回调方法返回次Binder实例
+* 从onBind()回调方法返回此Binder实例
 * 在客户端中，从onServiceConnected()回调方法接收Binder并使用提供的方法调用绑定服务
 
 ### 启动服务和绑定服务先后次序问题
