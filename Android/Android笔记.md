@@ -1,4 +1,4 @@
-# Android笔记
+#   Android笔记
 
 1. 选一个自己相对擅长的领域
 2. 基础要背
@@ -191,7 +191,7 @@ Android系统通过Activity栈的形式来管理Activity
 * 两者实现差异
 * 两者效率对比
 * 存储到存储设备上推荐Serializable
-* 在内存中传递推荐Parcelable
+* 在组件中、内存中传递推荐Parcelable
 
 ## Binder
 
@@ -274,14 +274,14 @@ Android系统通过Activity栈的形式来管理Activity
 #####静态注册
 
 * 在AndroidManifest.xml里通过`<receiver>`标签声明
-
 * 注册完成就一直运行，常驻进程中，不受组件生命周期影响
+* 应用场景：需要时刻监听广播，性能优化时计算每隔一段时间网络访问量
 
 #####动态注册
 
 * 在代码中调用Context.registerReceiver
-
 * 跟随组件的生命周期，在onResume中注册 在onPause注销广播 防止内存泄漏，onPause一定会执行，onStop、onDestroy不一定会执行
+* 应用场景：需要在特定时刻接受广播
 
 #### 内部实现机制
 * 自定义广播接受者BroadcastReceiver,并复写onReceive()方法
@@ -305,16 +305,16 @@ Android系统通过Activity栈的形式来管理Activity
 ### Webview常见的一些坑
 
 * Android API level 16以及之前的版本存在远程代码执行安全漏洞，该漏洞源于程序没有正确限制使用WebView.addJavascriptInterface方法，远程攻击者可通过使用Java Reflection API利用该漏洞执行任意Java对象的方法
-* Webview在布局文件的使用：Webview写在其他容器时 销毁Webview时候 先移除容器中的Webview 在调用Webview.removeAllView destroy
+* Webview在布局文件的使用：Webview写在其他容器时 销毁Webview时候 先移除容器中的Webview 再调用Webview.removeAllView Webview.destroy
 * jsbridge 
-* webviewClient.onPageFinished->webChromeClient.onProgressChanged
+* 使用webChromeClient.onProgressChanged代替webviewClient.onPageFinished（跳转页面时候会不断调用）
 * 后台耗电 onDestroy 调用System.exit(0);
 * Webview硬件加速导致页面渲染问题 android3.0开始  解决办法 关闭硬件加速
 
 ### 关于Webview的内存泄漏问题
 
 * 独立进程，简单暴力，不过可能涉及到进程间通信
-* 动态添加Webview，对传入Webview中使用的context使用弱引用，动态添加Webview意思在布局创建个ViewGroup用来放置webview，Activity创建时add进来，在Activity停止时remove掉
+* 动态添加Webview，对传入Webview中使用的Context使用弱引用，动态添加Webview意思在布局创建个ViewGroup用来放置webview，Activity创建时add进来，在Activity停止时remove掉
 
 ## Handler
 
@@ -324,7 +324,7 @@ Android SDK提供给开发者方便进行异步消息处理的类
 
 ### 什么是Handler
 
-Handler通过发送和处理Message 和 Runnable对象来关联对应线程的MessageQueue
+Handler通过发送、处理Message 和 Runnable对象来关联对应线程的MessageQueue
 * 可以让对应的Message和Runnable在未来的某个时间点进行相应处理
 * 让自己想要处理的耗时操作放在子线程，让更新ui的操作放在主线程
 
@@ -335,7 +335,7 @@ Handler通过发送和处理Message 和 Runnable对象来关联对应线程的Me
 
 ### Handler机制的原理
 
-Handler在主线程创建一个Looper（`mLooper = Looper.myLooper();`），然后再Looper内部创建一个MessageQueue队列，创建Handler的时候会取出当前线程的Looper对象，通过这个Looper不断轮询MessageQueue中的Message，然后交给Handler处理
+Handler在主线程创建一个Looper（`mLooper = Looper.myLooper();`），然后再Looper内部创建一个MessageQueue队列（单链表），创建Handler的时 候会取出当前线程的Looper对象，通过这个Looper不断轮询MessageQueue中的Message，然后交给Handler处理
 
 ### Handler引起的内存泄漏以及解决办法
 
@@ -343,6 +343,7 @@ Handler在主线程创建一个Looper（`mLooper = Looper.myLooper();`），然�
 	* handler内部持有外部activity的弱引用
 	* 把handler改为static内部类
 	* onDestroy时候mHandler.removeCallback()
+	* https://www.cnblogs.com/jimuzz/p/14187408.html
 
 ### Handler总结
 
@@ -361,9 +362,9 @@ Handler在主线程创建一个Looper（`mLooper = Looper.myLooper();`），然�
 
 #### AsyncTask的使用方法
 * 3个参数
-	* Integer 
-	* Integer 进度
-	* String result
+	* Params
+	* Progress 进度
+	* Result
 * 5个方法
 
 #### AsyncTask机制原理
