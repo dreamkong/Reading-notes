@@ -339,9 +339,8 @@ Handler在主线程创建一个Looper（`mLooper = Looper.myLooper();`），然�
 
 ### Handler引起的内存泄漏以及解决办法
 
-* 原因：静态内部类持有外部类的匿名引用，导致外部Activity无法释放
-	* handler内部持有外部activity的弱引用
-	* 把handler改为static内部类
+* 原因：匿名内部类持有外部Activity类的引用，导致外部Activity类的引用无法释放
+	* 把handler改为static内部类，handler内部持有外部activity的弱引用
 	* onDestroy时候mHandler.removeCallback()
 	* https://www.cnblogs.com/jimuzz/p/14187408.html
 
@@ -394,4 +393,143 @@ Handler+Thread+Looper
 * 优点是不会有堵塞，减少了对性能的消耗，缺点是不能同时进行多任务的处理，需要等待进行处理，处理效率低
 * 与线程池注重并发不同，HandlerThread是一个串行队列，HandlerThread背后只有一个线程
 #### handlerThread源码  
+
+## Android构建
+
+### Android构建流程
+
+![apk_build](/Users/dk/Desktop/Git/Reading-notes/Android/img/apk_build.png).java->.class->.dex+res->.apk
+
+### Jenkins持续集成构建
+
+## Git
+
+### Git容易混淆的两个概念
+
+1. 工作区  project
+2. .gitignore  忽略文件
+
+### 一些常用Git命令
+
+1. git init 创建git仓库
+2. git status 
+3. git diff 
+4. git add 
+5. git commit 
+6. git clone
+7. git branch 查看当前分支
+8. git checkout 切换分支
+
+### Git的两种工作流
+
+1. fork/clone
+
+    ![git_fork_clone](/Users/dk/Desktop/Git/Reading-notes/Android/img/git_fork_clone.png)
+
+2. clone
+
+## Gradle
+
+### setting.gradle
+
+包含哪些module
+
+### project build.gradle
+
+### app build.gradle
+
+## Proguard
+
+https://qingluanfeng.com/2020/07/11/Proguard%E3%80%81D8-%E5%92%8C-R8%E7%AE%80%E4%BB%8B/
+
+### proguard到底是什么
+
+Proguard工具是用于压缩，优化，混淆我们的代码，主要作用是可以移除代码中的无用类，字段，方法和属性同时可以混淆
+
+### proguard技术的功能
+
+1. 压缩 移除代码中的无用类
+2. 优化 字节码优化
+3. 混淆 混淆名称
+4. 预检测 在Java平台对代码再次检测
+
+### proguard工作原理
+
+#### EntryPoint
+
+## View
+
+### View的绘制机制
+
+1. view树的绘制流程
+
+    measure->layout->draw
+
+2. measure
+
+    1. ViewGroup.LayoutParams 视图高度和宽度
+    2. MeasureSpec 测量规格
+
+    ![measure](/Users/dk/Desktop/Git/Reading-notes/Android/img/measure.png)
+
+## 性能优化
+
+### ANR
+
+1. 什么是ANR
+
+    Application Not Responding 应用程序无响应的对话框 在主线程执行了耗时操作 Activity5秒 BoardcastReceiver10秒
+
+2. 造成ANR原因
+
+    应用程序的响应性是由Activity Manager和WindowManager系统服务监视的
+
+    主线程被IO操作（从4.0之后网络IO不允许在主线程中）阻塞
+
+    主线程中存在耗时操作
+
+3. Android中那些操作是在主线程中
+
+    1. Activity的所有生命周期回调都是执行在主线程的
+    2. Service默认是执行在主线程的
+    3. BroadcastReceiver的onReceive回调是执行在主线程的
+    4. 没有使用子线程的looper的Handler的handleMessage，post(Runnable)是执行主线程的
+    5. AsyncTask的回调除了doInBackground，其他都是执行在主线程的
+
+4. 如何解决ANR
+
+    1. 使用AsyncTask处理耗时IO操作
+    2. 使用Thread或者HandlerThread提高优先级
+    3. 使用handler来处理工作线程的耗时任务
+    4. Activity的onCreate和onResume回调中尽量避免耗时的代码
+
+### OOM
+
+1. 什么是OOM
+
+    当前占用的内存加上我们申请的内存资源超过了Dalvik虚拟机的最大内存限制就会抛出Out of memory异常
+
+2. 一些容易混淆的概念
+
+    内存溢出
+
+    内存抖动 在短时间内大量对象被创建又被马上释放触发GC
+
+    内存泄漏 进程中某些对象已经没有被其他对象引用了，但是它们可以直接或间接的引用到gc roots，导致gc无效，严重导致内存溢出
+
+3. 如何解决OOM
+
+    1. 有关bitmap
+
+        图片显示
+
+        及时释放内存 java区+c区
+
+        图片压缩
+
+        inBitmap属性
+
+        捕获异常 OutOfMemoryError
+
+    2. listview：convertview/lru、避免在onDraw方法里面执行对象的创建、谨慎使用多进程
 
